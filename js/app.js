@@ -12,6 +12,8 @@ var Enemy = function() {
     this.x = this.minX;
     this.y = 85 * this.laneY;
 
+    this.minCollision = 25;
+
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
@@ -24,6 +26,7 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers
     this.x += this.jumpX * dt;
+    this.checkCollision();
     if(this.x > 505){
         this.x = this.minX;
     }
@@ -31,16 +34,22 @@ Enemy.prototype.update = function(dt) {
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-    //console.log("render enemy... " + this.getX() + " " + this.getY() );
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Enemy.prototype.checkCollision = function(){
+    if(Math.abs(player.x - this.x) < this.minCollision && Math.abs(player.y - this.y) < this.minCollision){
+        console.log("Collision detected!!");
+        player.setPosition();
+    }
 };
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function(){
-    this.x = 210;
-    this.y = 400;
+    this.x = 0;
+    this.y = 0;
 
     this.minX = 100;
     this.minY = 50;
@@ -55,7 +64,8 @@ var Player = function(){
     this.moveVertical = 0;
 
     this.sprite = 'images/char-boy.png'
-}
+    this.setPosition();
+};
 
 Player.prototype.update = function(){
     if(this.moveHorizontal != 0){
@@ -65,13 +75,17 @@ Player.prototype.update = function(){
     else if(this.moveVertical != 0){
         this.y += this.verticalJump * this.moveVertical;
         this.moveVertical = 0;
+        if(this.y <= this.minY){
+            console.log("You won!!");
+            this.setPosition();
+        }
     }
-}
+};
 
 Player.prototype.render = function(){
     //console.log("render player... " + this.getX() + " " + this.getY() );
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
+};
 
 Player.prototype.handleInput = function(){
     //check to make sure we are not going off the screen to the left or right
@@ -107,7 +121,12 @@ Player.prototype.handleInput = function(){
             this.update();
         }
     }
-}
+};
+
+Player.prototype.setPosition = function(){
+    this.x = 210;
+    this.y = 400;
+};
 
 
 
