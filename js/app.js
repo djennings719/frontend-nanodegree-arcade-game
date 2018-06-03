@@ -12,7 +12,7 @@ var Enemy = function() {
     this.x = this.minX;
     this.y = 85 * this.laneY;
 
-    this.minCollision = 25;
+    this.minCollision = 50;
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
@@ -37,9 +37,14 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+/*
+    Check for collision with player
+    I put this here so we don't have to loop through our enemy list to detect a collision
+    If a collision is detected decrease score and reset position.
+ */
 Enemy.prototype.checkCollision = function(){
     if(Math.abs(player.x - this.x) < this.minCollision && Math.abs(player.y - this.y) < this.minCollision){
-        console.log("Collision detected!!");
+        player.updateScore(-25);
         player.setPosition();
     }
 };
@@ -48,6 +53,10 @@ Enemy.prototype.checkCollision = function(){
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function(){
+    this.score = 0;
+    this.scoreX = 50;
+    this.scoreY = 50;
+
     this.x = 0;
     this.y = 0;
 
@@ -65,6 +74,7 @@ var Player = function(){
 
     this.sprite = 'images/char-boy.png'
     this.setPosition();
+    this.updateScore(0);
 };
 
 Player.prototype.update = function(){
@@ -75,8 +85,11 @@ Player.prototype.update = function(){
     else if(this.moveVertical != 0){
         this.y += this.verticalJump * this.moveVertical;
         this.moveVertical = 0;
+        /* check for if we have entered the water tile
+           if we are in the water tile - update score and reset position to start
+        */
         if(this.y <= this.minY){
-            console.log("You won!!");
+            this.updateScore(50);
             this.setPosition();
         }
     }
@@ -85,12 +98,13 @@ Player.prototype.update = function(){
 Player.prototype.render = function(){
     //console.log("render player... " + this.getX() + " " + this.getY() );
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    ctx.font = "20px Arial";
+    ctx.fillText("Score: " + this.score, this.scoreX, this.scoreY);
 };
 
 Player.prototype.handleInput = function(){
     //check to make sure we are not going off the screen to the left or right
     if(event.keyCode === 37){
-        console.log("left");
         if(this.x > this.minX) {
             this.moveHorizontal = -1;
             this.moveVertical = 0;
@@ -98,7 +112,6 @@ Player.prototype.handleInput = function(){
         }
     }
     else if(event.keyCode === 38){
-        console.log("up");
         if(this.y > this.minY) {
             this.moveHorizontal = 0;
             this.moveVertical = -1;
@@ -106,7 +119,6 @@ Player.prototype.handleInput = function(){
         }
     }
     else if(event.keyCode === 39){
-        console.log("right");
         if(this.x < this.maxX) {
             this.moveHorizontal = 1;
             this.moveVertical = 0;
@@ -114,7 +126,6 @@ Player.prototype.handleInput = function(){
         }
     }
     else if(event.keyCode === 40){
-        console.log("down");
         if(this.y < this.maxY) {
             this.moveHorizontal = 0;
             this.moveVertical = 1;
@@ -128,6 +139,9 @@ Player.prototype.setPosition = function(){
     this.y = 400;
 };
 
+Player.prototype.updateScore = function(scoreAddition){
+    this.score += scoreAddition;
+};
 
 
 // Now instantiate your objects.
